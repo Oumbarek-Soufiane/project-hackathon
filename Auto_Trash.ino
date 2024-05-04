@@ -68,7 +68,7 @@ void loop() {
       delay(8000);
     } else if (distance > 8 && objectDetected) { // If no object is detected and was previously detected
       objectDetected = false;
-      servo.write(150); // Move the servo to 180 degrees position
+      servo.write(160); // Move the servo to 180 degrees position
       lcd.setCursor(0, 0);
       lcd.print("Trash Thrown !!");
       lcd.setCursor(2, 1);
@@ -86,7 +86,7 @@ void loop() {
     servo.write(60); // Move the servo to 60 degrees position
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Flame Detected!");
+    lcd.print("Fire Detected!");
     digitalWrite(greenLed, LOW);
    digitalWrite(buzzerPin, HIGH); // Activate the buzzer
     for(int i=0;i<10;i++){
@@ -113,7 +113,7 @@ void loop() {
       delay(200);
       digitalWrite(buzzerPin, LOW);
       delay(4);  
-      servo.write(140);
+      servo.write(160);
   }
 
 }
