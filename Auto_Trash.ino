@@ -14,6 +14,7 @@ const int greenLed = 6;
 const int buzzerPin = 5;
 const int flamePin = 2; // Digital pin for flame sensor
 long duration, distance;
+long aver[3];   //array for average
 
 void setup() {       
   pinMode(redLed, OUTPUT);
@@ -26,25 +27,37 @@ void setup() {
   lcd.init();
   lcd.backlight();
   lcd.print("garbage!");
-  servo.write(10);
+  servo.write(50);
   Serial.begin(9600);
 
 }
+void measure() {  
+ digitalWrite(10,HIGH);
+digitalWrite(trigPin, LOW);
+delayMicroseconds(10);
+digitalWrite(trigPin, HIGH);
+delayMicroseconds(15);
+digitalWrite(trigPin, LOW);
+pinMode(echoPin, INPUT);
+duration = pulseIn(echoPin, HIGH);
+distance = (duration/2) / 29.1;    //obtain distance
+}
 
 void loop() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
-  distance = (duration / 2) / 29.1; // Convert duration to distance in cm
+  for (int i=0;i<=2;i++) {   //average distance
+    measure();               
+   aver[i]=distance;            
+    delay(10);              //delay between measurements
+  }
+ distance=(aver[0]+aver[1]+aver[2])/3;    
+ 
   Serial.println(digitalRead(flamePin));
   // Check distance for object detection
   if (!flameDetected) { // If no flame is detected
     if (distance <= 10 && !objectDetected) { // If an object is detected within 10 cm
       objectDetected = true;
-      servo.write(90); // Move the servo to 90 degrees position
+      delay(1000);
+      servo.write(50); // Move the servo to 60 degrees position
       lcd.setCursor(0, 0);
       lcd.print("Throw the trash");
       lcd.setCursor(2, 1);
@@ -55,7 +68,7 @@ void loop() {
       delay(8000);
     } else if (distance > 8 && objectDetected) { // If no object is detected and was previously detected
       objectDetected = false;
-      servo.write(10); // Move the servo to 0 degrees position
+      servo.write(180); // Move the servo to 180 degrees position
       lcd.setCursor(0, 0);
       lcd.print("Trash Thrown !!");
       lcd.setCursor(2, 1);
@@ -70,13 +83,13 @@ void loop() {
   // Check for flame detection
   if (!flameDetected && digitalRead(flamePin) == LOW) { // If flame is detected
     flameDetected = true;
-    servo.write(90); // Move the servo to 180 degrees position
+    servo.write(50); // Move the servo to 60 degrees position
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Flame Detected!");
     digitalWrite(greenLed, LOW);
    digitalWrite(buzzerPin, HIGH); // Activate the buzzer
-    for(int i=0;i<2;i++){
+    for(int i=0;i<4;i++){
       digitalWrite(redLed, LOW);
       delay(500);
        digitalWrite(redLed, HIGH);
@@ -90,18 +103,17 @@ void loop() {
     flameHandled = false;
     // Return to normal operation
    lcd.clear();
-   servo.write(90); // Move the servo to 90 degrees position
+   delay(4);
+   servo.write(50); // Move the servo to 60 degrees position
       lcd.setCursor(0, 0);
       lcd.print("Throw the trash");
       lcd.setCursor(2, 1);
       lcd.print("please!!");
       digitalWrite(redLed, LOW);
       delay(200);
-      digitalWrite(redLed, HIGH);
-      digitalWrite(greenLed, HIGH);
       digitalWrite(buzzerPin, LOW);
-      delay(4);
-      servo.write(10);
-
+      delay(4);  
+      servo.write(180);
   }
+
 }
